@@ -4,16 +4,22 @@ import mapboxgl from 'mapbox-gl'
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFydGluLW4zeG8iLCJhIjoiY2p4MmJhOHJtMDE3MDRicmZzOGZnMTdrMiJ9.kIGprx1cMHV6_9HxLCM59A';
 
+const API_URL = "http://localhost:5000";
 
 class App extends React.Component {
-  map;
 
-  componentDidUpdate() {
-    // this.setFill();
-  }
+	// constructor(props) {
+	//     super(props);
+	// }
+
+	callAPI(lat, lon) {
+    return fetch(API_URL + "/tempapi?lat=" + lat + "&lon=" + lon).then(res => res.json());
+	}
 
   componentDidMount() {
-    this.map = new mapboxgl.Map({
+		var that = this;
+
+		this.map = new mapboxgl.Map({
       container: this.mapContainer,
       style: 'mapbox://styles/martin-n3xo/cjx2cjhlf0zp31cnv9o13ftzb?fresh=true',
       zoom: 1.6
@@ -37,7 +43,7 @@ class App extends React.Component {
 			})
 
 			this.map.addLayer({
-				'id': 'states',
+				'id': 'cities',
 				'source': 'countries',
 				'source-layer': 'place_label',
 				'type': 'symbol',
@@ -49,18 +55,17 @@ class App extends React.Component {
 			})
 		});
 
-		var map = this.map;
 		this.map.on('click', function (e) {
-			let features = map.queryRenderedFeatures(e.point, { layers: ['countries', 'states'] });
+			let features = that.map.queryRenderedFeatures(e.point, { layers: ['countries', 'cities'] });
 			if (features.length){
-				const name = features[0].properties.name_es; // Grab the country code from the map properties.
-				const html = `
-				<h1>${name}</h1>
-				`;
-				new mapboxgl.Popup()
-				.setLngLat(e.lngLat)
-				.setHTML(html)
-				.addTo(map);
+				var lng = features[0].geometry.coordinates[0];
+				var lat = features[0].geometry.coordinates[1];
+				that.callAPI(lat, lng).then(res => {
+					new mapboxgl.Popup()
+						.setHTML('<h1>Temperatura: ' + res.temp + 'C</h1><h1>Estacion: ' + res.season + '</h1>')
+						.setLngLat([lng, lat])
+						.addTo(that.map);
+				});
 			}
     });
   }
