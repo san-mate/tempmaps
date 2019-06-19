@@ -7,6 +7,17 @@
 var app = require('../app');
 var debug = require('debug')('api:server');
 var http = require('http');
+/**
+ * Production server
+ */
+if (process.env.NODE_ENV === 'production') {
+	app.use(express.static(path.join(__dirname, '../build')));
+
+	// Handle React routing, return all requests to React app
+	app.get('*', function(req, res) {
+		res.sendFile(path.join(__dirname, '../build', 'index.html'));
+	});
+}
 
 /**
  * Get port from environment and store in Express.
