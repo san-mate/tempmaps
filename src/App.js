@@ -4,7 +4,7 @@ import mapboxgl from 'mapbox-gl'
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFydGluLW4zeG8iLCJhIjoiY2p4MmJhOHJtMDE3MDRicmZzOGZnMTdrMiJ9.kIGprx1cMHV6_9HxLCM59A';
 
-const API_URL = "http://localhost:5000";
+const API_URL = "/tempapi";
 
 class App extends React.Component {
 
@@ -13,7 +13,7 @@ class App extends React.Component {
 	// }
 
 	callAPI(lat, lon) {
-    return fetch(API_URL + "/tempapi?lat=" + lat + "&lon=" + lon).then(res => res.json());
+    return fetch(API_URL + "?lat=" + lat + "&lon=" + lon).then(res => res.json());
 	}
 
   componentDidMount() {

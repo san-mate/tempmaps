@@ -3,22 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "mapbox-gl": "^1.0.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "3.0.1",
-		"cookie-parser": "~1.4.4",
+    "concurrently": "^4.1.0",
+    "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "express-redis-cache": "^1.1.3",
     "http-errors": "~1.6.3",
+    "mapbox-gl": "^1.0.0",
     "morgan": "~1.9.1",
     "node-fetch": "^2.6.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "3.0.1",
     "redis": "^2.8.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently \"node ./api/bin/www\" \"react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -26,6 +27,7 @@
   "eslintConfig": {
     "extends": "react-app"
   },
+	"proxy": "http://localhost:5000/",
   "browserslist": {
     "production": [
       ">0.2%",
