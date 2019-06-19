@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import mapboxgl from 'mapbox-gl'
+import './App.css';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibWFydGluLW4zeG8iLCJhIjoiY2p4MmJhOHJtMDE3MDRicmZzOGZnMTdrMiJ9.kIGprx1cMHV6_9HxLCM59A';
 
