@@ -20,31 +20,48 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+function fetch_retry(req){
+	return new Promise(function(resolve, reject) {
+		fetch(DARK_SKY_API + req.query.lat + ',' + req.query.lon + '?exclude=minutely,hourly,daily,alerts,flags&units=si')
+			.then(res => res.json())
+			.then(res => {
+				// Agrega el factor de error
+				error = Math.random() * 100;
+				console.log("valor del error: " + error);
+				if(error < 10)
+					throw "error-retry"
+
+				var current_time = new Date(res.currently.time*1000);
+				var season;
+				if (current_time.getMonth() > 2 && current_time.getMonth() < 6) {
+					season = req.query.lat > 0 ? "Primavera" : "Otoño";
+				} else if (current_time.getMonth() > 8 && current_time.getMonth() < 12) {
+					season = req.query.lat > 0 ? "Otoño" : "Primavera";
+				} else if ( current_time.getMonth() > 5 && current_time.getMonth() < 9) {
+					season = req.query.lat > 0 ? "Verano" : "Invierno";
+				} else if ( current_time.getMonth() > 5 && current_time.getMonth() < 9) {
+					season = req.query.lat > 0 ? "Invierno" : "Verano";
+				}
+
+				resolve({
+					temp: res['currently']['temperature'],
+					season: season
+				});
+			})
+			.catch(err => {
+				if (err == 'error-retry'){
+					fetch_retry(req).then(resolve).catch(reject);
+				} else {
+					res.send("error externo de la api");
+				}
+			});
+	})
+}
 
 app.get('/tempapi', cache.route({ expire: 60 }), function(req, res, next) {
-	fetch(DARK_SKY_API + req.query.lat + ',' + req.query.lon + '?exclude=minutely,hourly,daily,alerts,flags&units=si')
-		.then(res => res.json())
-	  .then(data => {
-			var current_time = new Date(data.currently.time*1000);
-			var season;
-			if (current_time.getMonth() > 2 && current_time.getMonth() < 6) {
-		    season = req.query.lat > 0 ? "Primavera" : "Otoño";
-			} else if (current_time.getMonth() > 8 && current_time.getMonth() < 12) {
-				season = req.query.lat > 0 ? "Otoño" : "Primavera";
-		  } else if ( current_time.getMonth() > 5 && current_time.getMonth() < 9) {
-				season = req.query.lat > 0 ? "Verano" : "Invierno";
-		  } else if ( current_time.getMonth() > 5 && current_time.getMonth() < 9) {
-				season = req.query.lat > 0 ? "Invierno" : "Verano";
-			}
-
-	    res.send({
-				temp: data['currently']['temperature'],
-				season: season
-			});
-		})
-	 	.catch(err => {
-	    res.send("error");
-		});
+	fetch_retry(req, res).then(data => {
+		res.send(data);
+	})
 });
 
 module.exports = app;
